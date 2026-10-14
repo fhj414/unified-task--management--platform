@@ -1,0 +1,42 @@
+{
+  "name": "@enterprise-hub/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "nest start --watch",
+    "build": "nest build",
+    "typecheck": "tsc --noEmit",
+    "test": "jest",
+    "test:e2e": "jest --config test/jest-e2e.json",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "dependencies": {
+    "@enterprise-hub/shared": "workspace:*",
+    "@nestjs/bullmq": "^11.0.0",
+    "@nestjs/common": "^11.0.0",
+    "@nestjs/config": "^4.0.0",
+    "@nestjs/core": "^11.0.0",
+    "@nestjs/platform-express": "^11.0.0",
+    "@nestjs/swagger": "^11.0.0",
+    "@prisma/client": "^6.0.0",
+    "bullmq": "^5.0.0",
+    "ioredis": "^5.0.0",
+    "joi": "^17.0.0",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.0"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.0",
+    "@nestjs/testing": "^11.0.0",
+    "@types/jest": "^29.5.0",
+    "@types/node": "^22.0.0",
+    "@types/supertest": "^6.0.0",
+    "jest": "^29.0.0",
+    "prisma": "^6.0.0",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.0.0",
+    "typescript": "^5.6.3"
+  }
+}
