@@ -15,5 +15,8 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc --noEmit",
     "test": "echo \"@enterprise-hub/shared has type-only contracts\""
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
   }
 }
