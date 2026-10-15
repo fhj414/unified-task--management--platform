@@ -1,8 +1,9 @@
 import { INestApplication } from '@nestjs/common';
+import { HttpAdapterHost } from '@nestjs/core';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { PrismaService } from '../src/common/database/prisma.service';
-import { HealthModule } from '../src/common/health/health.module';
+import { HttpExceptionFilter } from '../src/common/filters/http-exception.filter';
 import { RedisService } from '../src/common/redis/redis.service';
 
 interface ProbeOverrides {
@@ -13,8 +14,9 @@ interface ProbeOverrides {
 async function createApp(
   overrides: ProbeOverrides = {},
 ): Promise<INestApplication> {
+  const { AppModule } = await import('../src/app.module');
   const moduleRef = await Test.createTestingModule({
-    imports: [HealthModule],
+    imports: [AppModule],
   })
     .overrideProvider(PrismaService)
     .useValue({
@@ -24,6 +26,9 @@ async function createApp(
     .useValue({ ping: overrides.ping ?? (() => Promise.resolve()) })
     .compile();
   const app = moduleRef.createNestApplication();
+  app.useGlobalFilters(
+    new HttpExceptionFilter(app.get(HttpAdapterHost)),
+  );
   app.useLogger(false);
   await app.init();
 
@@ -32,6 +37,30 @@ async function createApp(
 
 describe('GET /health', () => {
   let app: INestApplication | undefined;
+  const testEnvironment = {
+    PORT: '3000',
+    DATABASE_URL: 'postgresql://test:test@localhost:5432/test',
+    REDIS_HOST: '127.0.0.1',
+    REDIS_PORT: '6379',
+    CORS_ORIGIN: 'http://localhost:5173',
+  };
+  const originalEnvironment = Object.fromEntries(
+    Object.keys(testEnvironment).map((key) => [key, process.env[key]]),
+  );
+
+  beforeAll(() => {
+    Object.assign(process.env, testEnvironment);
+  });
+
+  afterAll(() => {
+    for (const [key, value] of Object.entries(originalEnvironment)) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  });
 
   afterEach(async () => {
     await app?.close();
