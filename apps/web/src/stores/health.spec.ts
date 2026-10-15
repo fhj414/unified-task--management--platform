@@ -22,6 +22,15 @@ const unavailableResponse = {
   },
 } as const;
 
+function createDeferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((resolvePromise) => {
+    resolve = resolvePromise;
+  });
+
+  return { promise, resolve };
+}
+
 describe('health store', () => {
   beforeEach(() => {
     setActivePinia(createPinia());
@@ -82,6 +91,57 @@ describe('health store', () => {
     await expect(store.loadHealth()).resolves.toBeUndefined();
 
     expect(store.state).toBe('unavailable');
+    expect(store.isLoading).toBe(false);
+  });
+
+  it('does not retain malformed JSON health data', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify({ message: 'unavailable' }), { status: 200 }),
+      ),
+    );
+    const store = useHealthStore();
+
+    await expect(store.loadHealth()).resolves.toBeUndefined();
+
+    expect(store.state).toBe('unavailable');
+    expect(store.health).toBeUndefined();
+    expect(store.isLoading).toBe(false);
+  });
+
+  it('keeps the newest health result when an earlier request resolves last', async () => {
+    const earlierRequest = createDeferred<Response>();
+    const newerRequest = createDeferred<Response>();
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockImplementationOnce(() => earlierRequest.promise)
+        .mockImplementationOnce(() => newerRequest.promise),
+    );
+    const store = useHealthStore();
+
+    const earlierLoad = store.loadHealth();
+    const newerLoad = store.loadHealth();
+
+    newerRequest.resolve(
+      new Response(
+        JSON.stringify({
+          ...healthyResponse,
+          timestamp: '2026-10-15T08:05:00.000Z',
+        }),
+        { status: 200 },
+      ),
+    );
+    await newerLoad;
+    earlierRequest.resolve(
+      new Response(JSON.stringify(unavailableResponse), { status: 503 }),
+    );
+    await earlierLoad;
+
+    expect(store.state).toBe('connected');
+    expect(store.health?.timestamp).toBe('2026-10-15T08:05:00.000Z');
     expect(store.isLoading).toBe(false);
   });
 });
