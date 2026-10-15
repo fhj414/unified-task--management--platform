@@ -1,0 +1,376 @@
+:root {
+  color: #182033;
+  background: #f3f6fa;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  --canvas: #f3f6fa;
+  --surface: #ffffff;
+  --surface-muted: #eaf0f7;
+  --ink: #182033;
+  --muted: #58677e;
+  --border: #c9d4e2;
+  --navy: #182a44;
+  --blue: #1d5bc1;
+  --blue-soft: #dce9ff;
+  --green: #0a6b4d;
+  --green-soft: #d8f3e8;
+  --amber: #8a4d00;
+  --amber-soft: #fff0cf;
+  --red: #a12626;
+  --red-soft: #fde3e1;
+  --focus: #004fc4;
+  --shadow: 0 12px 30px rgb(24 42 68 / 8%);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+}
+
+button,
+a {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+a:focus-visible,
+[tabindex]:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4.5rem;
+  padding: 0.75rem clamp(1rem, 4vw, 3.5rem);
+  color: #ffffff;
+  background: var(--navy);
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #ffffff;
+  font-weight: 750;
+  text-decoration: none;
+}
+
+.brand-mark {
+  display: grid;
+  width: 2.25rem;
+  height: 2.25rem;
+  place-items: center;
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 0.6rem;
+  background: rgb(255 255 255 / 12%);
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+}
+
+.header-context {
+  margin: 0;
+  color: #dbe7fb;
+  font-size: 0.9rem;
+}
+
+.app-layout {
+  display: grid;
+  grid-template-columns: minmax(13.5rem, 18rem) minmax(0, 1fr);
+  min-height: calc(100vh - 4.5rem);
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  padding: 2rem clamp(1rem, 3vw, 2.5rem);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+.nav-label,
+.eyebrow {
+  margin: 0 0 0.5rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 750;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+}
+
+.nav-link {
+  display: block;
+  margin-top: 0.2rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 0.5rem;
+  color: #31425d;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+  color: #102d63;
+  background: var(--blue-soft);
+}
+
+.nav-link.is-current {
+  color: #102d63;
+  background: var(--blue-soft);
+}
+
+.health-card,
+.todo-panel {
+  border: 1px solid var(--border);
+  border-radius: 0.9rem;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.health-card {
+  padding: 1.25rem;
+}
+
+.health-card h2,
+.todo-panel h2,
+.task-row h3 {
+  margin: 0;
+}
+
+.health-card h2,
+.todo-panel h2 {
+  font-size: 1.1rem;
+}
+
+.connection-status {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1rem 0 0.5rem;
+  font-weight: 750;
+}
+
+.status-dot {
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: var(--amber);
+}
+
+.connection-status.is-connected {
+  color: var(--green);
+}
+
+.connection-status.is-connected .status-dot {
+  background: var(--green);
+}
+
+.connection-status.is-unavailable {
+  color: var(--red);
+}
+
+.connection-status.is-unavailable .status-dot {
+  background: var(--red);
+}
+
+.connection-status.is-loading {
+  color: var(--blue);
+}
+
+.connection-status.is-loading .status-dot {
+  background: var(--blue);
+}
+
+.health-detail {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.service-statuses {
+  display: grid;
+  gap: 0.45rem;
+  margin: 1rem 0 0;
+}
+
+.service-statuses div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+
+.service-statuses dd {
+  margin: 0;
+  color: var(--ink);
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.main-content {
+  width: min(100%, 78rem);
+  padding: clamp(1.5rem, 5vw, 4rem);
+}
+
+.welcome {
+  max-width: 43rem;
+  margin-bottom: 2rem;
+}
+
+.welcome h1 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.welcome > p:last-child {
+  max-width: 38rem;
+  margin: 1rem 0 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  line-height: 1.65;
+}
+
+.todo-panel {
+  padding: clamp(1rem, 3vw, 2rem);
+}
+
+.section-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.preview-badge,
+.priority {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.8rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 750;
+  white-space: nowrap;
+}
+
+.preview-badge {
+  color: #163d7a;
+  background: var(--blue-soft);
+}
+
+.preview-note {
+  margin: 1.25rem 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.task-list {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.task-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.7rem;
+  background: #fbfcfe;
+}
+
+.task-row h3 {
+  font-size: 1rem;
+}
+
+.task-row p {
+  margin: 0.35rem 0 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.priority[data-priority="high"] {
+  color: var(--red);
+  background: var(--red-soft);
+}
+
+.priority[data-priority="medium"] {
+  color: var(--amber);
+  background: var(--amber-soft);
+}
+
+.priority[data-priority="low"] {
+  color: var(--green);
+  background: var(--green-soft);
+}
+
+@media (max-width: 48rem) {
+  .app-header {
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .header-context {
+    max-width: 10rem;
+    text-align: right;
+  }
+
+  .app-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    gap: 1.25rem;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .nav-link {
+    display: inline-block;
+    margin-right: 0.35rem;
+  }
+}
+
+@media (max-width: 31rem) {
+  .app-header,
+  .section-heading,
+  .task-row {
+    align-items: flex-start;
+  }
+
+  .app-header,
+  .section-heading,
+  .task-row {
+    flex-direction: column;
+  }
+
+  .header-context {
+    max-width: none;
+    text-align: left;
+  }
+}
