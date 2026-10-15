@@ -25,7 +25,9 @@ class CapturingLogger implements LoggerService {
 function createContext(statusCode = 201): ExecutionContext {
   const request = {
     method: 'POST',
-    url: '/example?visible=true',
+    path: '/example',
+    originalUrl: '/example?access_token=private-token',
+    url: '/example?access_token=private-token',
     headers: { authorization: 'Bearer private-token' },
     body: { password: 'private-password' },
   };
@@ -51,7 +53,7 @@ describe('RequestLoggingInterceptor', () => {
     expect(logger.logs).toEqual([
       {
         method: 'POST',
-        url: '/example?visible=true',
+        path: '/example',
         statusCode: 201,
         durationMs: expect.any(Number),
       },
@@ -60,7 +62,7 @@ describe('RequestLoggingInterceptor', () => {
       0,
     );
     expect(JSON.stringify(logger.logs)).not.toMatch(
-      /private-token|private-password|authorization|headers|body/,
+      /private-token|private-password|authorization|headers|body|"url"/,
     );
   });
 
@@ -78,7 +80,7 @@ describe('RequestLoggingInterceptor', () => {
     expect(logger.errors).toEqual([
       {
         method: 'POST',
-        url: '/example?visible=true',
+        path: '/example',
         statusCode: 400,
         durationMs: expect.any(Number),
       },
@@ -100,7 +102,7 @@ describe('RequestLoggingInterceptor', () => {
     expect(logger.errors).toEqual([
       {
         method: 'POST',
-        url: '/example?visible=true',
+        path: '/example',
         statusCode: 500,
         durationMs: expect.any(Number),
       },

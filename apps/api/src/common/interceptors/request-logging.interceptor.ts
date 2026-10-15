@@ -12,9 +12,16 @@ import { Observable, catchError, tap, throwError } from 'rxjs';
 
 interface RequestLogEntry {
   method: string;
-  url: string;
+  path: string;
   statusCode: number;
   durationMs: number;
+}
+
+interface HttpRequestMetadata {
+  method: string;
+  path?: string;
+  originalUrl?: string;
+  url?: string;
 }
 
 @Injectable()
@@ -27,12 +34,13 @@ export class RequestLoggingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
     const httpContext = context.switchToHttp();
-    const request = httpContext.getRequest<{ method: string; url: string }>();
+    const request = httpContext.getRequest<HttpRequestMetadata>();
     const response = httpContext.getResponse<{ statusCode: number }>();
     const startedAt = Date.now();
+    const path = this.getRequestPath(request);
     const entry = (statusCode: number): RequestLogEntry => ({
       method: request.method,
-      url: request.url,
+      path,
       statusCode,
       durationMs: Date.now() - startedAt,
     });
@@ -50,5 +58,10 @@ export class RequestLoggingInterceptor implements NestInterceptor {
         return throwError(() => error);
       }),
     );
+  }
+
+  private getRequestPath(request: HttpRequestMetadata): string {
+    const rawPath = request.path ?? request.originalUrl ?? request.url ?? '/';
+    return rawPath.split(/[?#]/, 1)[0] || '/';
   }
 }
