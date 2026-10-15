@@ -12,8 +12,11 @@
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
     "test:e2e": "pnpm --filter @enterprise-hub/api test:e2e",
-    "prisma:generate": "pnpm --filter @enterprise-hub/api prisma:generate",
-    "prisma:migrate": "pnpm --filter @enterprise-hub/api prisma:migrate",
-    "prisma:studio": "pnpm --filter @enterprise-hub/api prisma:studio"
+    "prisma:generate": "dotenv -e .env -- pnpm --filter @enterprise-hub/api prisma:generate",
+    "prisma:migrate": "dotenv -e .env -- pnpm --filter @enterprise-hub/api prisma:migrate",
+    "prisma:studio": "dotenv -e .env -- pnpm --filter @enterprise-hub/api prisma:studio"
+  },
+  "devDependencies": {
+    "dotenv-cli": "11.0.0"
   }
 }
