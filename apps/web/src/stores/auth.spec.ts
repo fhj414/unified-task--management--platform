@@ -95,16 +95,37 @@ describe('auth store', () => {
 
   it('clears the session token and current user on logout', async () => {
     sessionStorage.setItem(storedTokenKey, 'stored-token');
-    vi.stubGlobal('fetch', vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(ada), { status: 200 }),
-    ));
+    vi.stubGlobal(
+      'fetch',
+      vi
+        .fn()
+        .mockResolvedValueOnce(new Response(JSON.stringify(ada), { status: 200 }))
+        .mockResolvedValueOnce(new Response(JSON.stringify([ada, grace]), { status: 200 })),
+    );
     const store = useAuthStore();
     await store.initialize();
 
-    store.logout();
+    await store.logout();
 
     expect(sessionStorage.getItem(storedTokenKey)).toBeNull();
     expect(store.state).toBe('anonymous');
     expect(store.user).toBeUndefined();
+  });
+
+  it('loads account choices after a restored session logs out', async () => {
+    sessionStorage.setItem(storedTokenKey, 'stored-token');
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(new Response(JSON.stringify(ada), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify([ada, grace]), { status: 200 }));
+    vi.stubGlobal('fetch', fetchMock);
+    const store = useAuthStore();
+
+    await store.initialize();
+    await store.logout();
+
+    expect(fetchMock).toHaveBeenNthCalledWith(2, '/auth/mock-users');
+    expect(store.state).toBe('anonymous');
+    expect(store.mockUsers).toEqual([ada, grace]);
   });
 });

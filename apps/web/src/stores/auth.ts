@@ -86,10 +86,12 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  function logout(): void {
+  async function logout(): Promise<void> {
     sessionStorage.removeItem(accessTokenKey);
     user.value = undefined;
     error.value = undefined;
+    state.value = 'loading';
+    await loadMockUsers();
     state.value = 'anonymous';
   }
 
