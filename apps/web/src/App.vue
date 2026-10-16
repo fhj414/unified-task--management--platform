@@ -1,23 +1,36 @@
 <script setup lang="ts">
 import { onMounted } from 'vue';
+import { useAuthStore } from './stores/auth';
 import { useHealthStore } from './stores/health';
+import MockLoginView from './views/MockLoginView.vue';
 import TodoPlaceholderView from './views/TodoPlaceholderView.vue';
 
+const authStore = useAuthStore();
 const healthStore = useHealthStore();
 
 onMounted(() => {
+  void authStore.initialize();
   void healthStore.loadHealth();
 });
 </script>
 
 <template>
-  <div class="app-shell">
+  <main v-if="authStore.state === 'loading'" class="auth-loading" aria-live="polite">
+    <p>Preparing your workspace…</p>
+  </main>
+
+  <MockLoginView v-else-if="authStore.state === 'anonymous'" />
+
+  <div v-else class="app-shell">
     <header class="app-header">
       <a class="brand" href="#main-content" aria-label="Enterprise Hub home">
         <span class="brand-mark" aria-hidden="true">EH</span>
         <span>Enterprise Hub</span>
       </a>
-      <p class="header-context">Team workspace preview</p>
+      <div class="header-account">
+        <p class="header-context current-user">{{ authStore.user?.name }}</p>
+        <button class="logout-button" type="button" @click="authStore.logout">Sign out</button>
+      </div>
     </header>
 
     <div class="app-layout">

@@ -6,6 +6,7 @@ export default defineConfig({
   server: {
     proxy: {
       '/health': 'http://localhost:3000',
+      '/auth': 'http://localhost:3000',
     },
   },
   test: {

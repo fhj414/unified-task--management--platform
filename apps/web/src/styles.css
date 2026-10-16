@@ -38,6 +38,15 @@ a {
   font: inherit;
 }
 
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
 a {
   color: inherit;
 }
@@ -87,6 +96,103 @@ a:focus-visible,
   margin: 0;
   color: #dbe7fb;
   font-size: 0.9rem;
+}
+
+.header-account {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.logout-button {
+  padding: 0.4rem 0.7rem;
+  border: 1px solid rgb(255 255 255 / 45%);
+  border-radius: 0.45rem;
+  color: #ffffff;
+  background: transparent;
+  font-weight: 700;
+}
+
+.logout-button:hover,
+.logout-button:focus-visible {
+  background: rgb(255 255 255 / 12%);
+}
+
+.auth-loading,
+.login-page {
+  display: grid;
+  min-height: 100vh;
+  padding: clamp(1.5rem, 5vw, 4rem);
+  place-items: center;
+}
+
+.auth-loading {
+  color: var(--muted);
+}
+
+.login-panel {
+  width: min(100%, 31rem);
+  padding: clamp(1.5rem, 5vw, 3rem);
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.login-panel h1 {
+  margin: 0;
+  color: var(--navy);
+  font-size: clamp(1.8rem, 4vw, 2.6rem);
+  letter-spacing: -0.035em;
+}
+
+.login-description,
+.login-note {
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.login-form {
+  display: grid;
+  gap: 0.65rem;
+  margin-top: 1.5rem;
+}
+
+.login-form label {
+  font-weight: 700;
+}
+
+.login-form select,
+.login-form button {
+  min-height: 2.75rem;
+  padding: 0.55rem 0.7rem;
+  border-radius: 0.5rem;
+}
+
+.login-form select {
+  border: 1px solid var(--border);
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.login-form button {
+  border: 1px solid var(--blue);
+  color: #ffffff;
+  background: var(--blue);
+  font-weight: 750;
+}
+
+.login-form button:hover:not(:disabled),
+.login-form button:focus-visible:not(:disabled) {
+  background: #164a9e;
+}
+
+.form-error {
+  margin: 0;
+  padding: 0.7rem;
+  border-radius: 0.5rem;
+  color: var(--red);
+  background: var(--red-soft);
 }
 
 .app-layout {
@@ -340,6 +446,12 @@ a:focus-visible,
     text-align: right;
   }
 
+  .header-account {
+    align-items: flex-end;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
   .app-layout {
     grid-template-columns: 1fr;
   }
@@ -372,5 +484,9 @@ a:focus-visible,
   .header-context {
     max-width: none;
     text-align: left;
+  }
+
+  .header-account {
+    align-items: flex-start;
   }
 }
