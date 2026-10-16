@@ -14,6 +14,7 @@
     "test:e2e": "pnpm --filter @enterprise-hub/api test:e2e",
     "prisma:generate": "dotenv -e .env -- pnpm --filter @enterprise-hub/api prisma:generate",
     "prisma:migrate": "dotenv -e .env -- pnpm --filter @enterprise-hub/api prisma:migrate",
+    "prisma:seed": "dotenv -e .env -- pnpm --filter @enterprise-hub/api prisma:seed",
     "prisma:studio": "dotenv -e .env -- pnpm --filter @enterprise-hub/api prisma:studio"
   },
   "devDependencies": {

@@ -1,11 +1,16 @@
 import { validateEnvironment } from './env.validation';
 
-const validConfig = {
+const baseEnvironment = {
   PORT: '4000',
   DATABASE_URL: 'postgresql://user:password@localhost:5432/enterprise_hub',
   REDIS_HOST: 'localhost',
   REDIS_PORT: '6380',
   CORS_ORIGIN: 'http://localhost:5173',
+};
+
+const validConfig = {
+  ...baseEnvironment,
+  JWT_SECRET: 'local-development-jwt-secret-change-me',
 };
 
 describe('validateEnvironment', () => {
@@ -18,6 +23,8 @@ describe('validateEnvironment', () => {
       REDIS_HOST: 'localhost',
       REDIS_PORT: 6380,
       CORS_ORIGIN: 'http://localhost:5173',
+      JWT_SECRET: 'local-development-jwt-secret-change-me',
+      JWT_EXPIRES_IN: '1h',
     });
   });
 
@@ -45,5 +52,18 @@ describe('validateEnvironment', () => {
     expect(() =>
       validateEnvironment({ ...validConfig, CORS_ORIGIN: 'not a uri' }),
     ).toThrow(/CORS_ORIGIN/);
+  });
+
+  it('rejects an omitted JWT secret', () => {
+    expect(() => validateEnvironment(baseEnvironment)).toThrow(/JWT_SECRET/);
+  });
+
+  it('defaults the JWT expiry for a valid secret', () => {
+    expect(
+      validateEnvironment({
+        ...baseEnvironment,
+        JWT_SECRET: 'local-development-jwt-secret-change-me',
+      }),
+    ).toMatchObject({ JWT_EXPIRES_IN: '1h' });
   });
 });

@@ -6,6 +6,8 @@ export interface EnvironmentVariables {
   REDIS_HOST: string;
   REDIS_PORT: number;
   CORS_ORIGIN: string;
+  JWT_SECRET: string;
+  JWT_EXPIRES_IN: string;
 }
 
 const environmentSchema = Joi.object({
@@ -14,6 +16,8 @@ const environmentSchema = Joi.object({
   REDIS_HOST: Joi.string().required(),
   REDIS_PORT: Joi.number().port().default(6379),
   CORS_ORIGIN: Joi.string().uri().required(),
+  JWT_SECRET: Joi.string().min(24).required(),
+  JWT_EXPIRES_IN: Joi.string().default('1h'),
 });
 
 export function validateEnvironment(
