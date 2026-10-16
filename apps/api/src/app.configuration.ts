@@ -27,6 +27,7 @@ export function configureApplication(
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Enterprise Hub API')
     .setVersion('0.1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('/docs', app, document);
