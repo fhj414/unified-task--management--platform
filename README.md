@@ -47,7 +47,7 @@ From the repository root:
 ```bash
 pnpm install
 cp .env.example .env
-docker compose up -d
+docker compose up -d --wait --wait-timeout 60
 docker compose ps
 pnpm prisma:generate
 pnpm prisma:migrate
@@ -60,7 +60,7 @@ commit `.env`; adjust it locally only when your ports or credentials differ.
 
 ```bash
 # Start or update PostgreSQL and Redis
-docker compose up -d
+docker compose up -d --wait --wait-timeout 60
 
 # Inspect their health
 docker compose ps
@@ -133,13 +133,26 @@ pnpm test
 pnpm test:e2e
 ```
 
-For a complete local verification run, start Compose and apply migrations
-before the endpoint test and live health checks:
+For a complete local verification run, use three terminals in this order.
+The API must be running before the endpoint requests in the final block.
+
+**Terminal B — prepare the local stack and database:**
 
 ```bash
-docker compose up -d
+docker compose up -d --wait --wait-timeout 60
 pnpm prisma:generate
 pnpm prisma:migrate
+```
+
+**Terminal A — start the API and keep this command running:**
+
+```bash
+pnpm dev:api
+```
+
+**Terminal B — run the checks while Terminal A is still running:**
+
+```bash
 pnpm typecheck && pnpm build && pnpm test && pnpm test:e2e
 curl --fail --silent http://localhost:3000/health
 curl --fail --silent http://localhost:3000/docs
@@ -165,12 +178,14 @@ curl --silent --show-error --output /tmp/enterprise-hub-health.json \
   --write-out '%{http_code}\n' http://localhost:3000/health
 cat /tmp/enterprise-hub-health.json
 docker compose start redis
-curl --fail --silent http://localhost:3000/health
+until curl --fail --silent http://localhost:3000/health; do
+  sleep 1
+done
 ```
 
 The first request should report HTTP `503`, `database: "up"`, and
-`redis: "down"`; after Redis is restarted, the final request should be HTTP
-`200`.
+`redis: "down"`; after Redis is restarted, the final loop retries until the
+health endpoint returns HTTP `200`.
 
 ## Troubleshooting
 
