@@ -14,7 +14,10 @@ export class RedisService implements OnModuleInit, OnModuleDestroy {
       host: this.configService.get('REDIS_HOST', { infer: true }),
       port: this.configService.get('REDIS_PORT', { infer: true }),
       lazyConnect: true,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
     });
+    this.client.on('error', () => undefined);
   }
 
   async onModuleInit(): Promise<void> {

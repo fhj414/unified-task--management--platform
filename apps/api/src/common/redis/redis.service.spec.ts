@@ -7,6 +7,7 @@ jest.mock('ioredis');
 
 interface RedisClientDouble {
   connect: jest.Mock<Promise<void>, []>;
+  on: jest.Mock<Redis, [string, (...args: unknown[]) => void]>;
   quit: jest.Mock<Promise<'OK'>, []>;
   ping: jest.Mock<Promise<string>, []>;
 }
@@ -30,6 +31,7 @@ describe('RedisService', () => {
   beforeEach(() => {
     client = {
       connect: jest.fn().mockResolvedValue(undefined),
+      on: jest.fn().mockReturnThis(),
       quit: jest.fn().mockResolvedValue('OK'),
       ping: jest.fn().mockResolvedValue('PONG'),
     };
@@ -47,7 +49,15 @@ describe('RedisService', () => {
       host: 'redis.internal',
       port: 6381,
       lazyConnect: true,
+      enableOfflineQueue: false,
+      maxRetriesPerRequest: 1,
     });
+  });
+
+  it('registers an error listener so an unavailable Redis server is not an unhandled event', () => {
+    new RedisService(createConfigService());
+
+    expect(client.on).toHaveBeenCalledWith('error', expect.any(Function));
   });
 
   it('connects the Redis client during module initialization', async () => {
