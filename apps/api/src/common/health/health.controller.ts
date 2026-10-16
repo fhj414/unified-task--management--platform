@@ -4,7 +4,8 @@ import {
   ApiOperation,
   ApiServiceUnavailableResponse,
 } from '@nestjs/swagger';
-import { HealthResponse } from '@enterprise-hub/shared';
+import type { HealthResponse } from '@enterprise-hub/shared';
+import { HealthResponseDto } from './health-response.dto';
 import { HealthService } from './health.service';
 
 interface StatusResponse {
@@ -17,9 +18,13 @@ export class HealthController {
 
   @Get('health')
   @ApiOperation({ summary: 'Check API and dependency health' })
-  @ApiOkResponse({ description: 'The API and its dependencies are healthy.' })
+  @ApiOkResponse({
+    description: 'The API and its dependencies are healthy.',
+    type: HealthResponseDto,
+  })
   @ApiServiceUnavailableResponse({
     description: 'One or more dependencies are unavailable.',
+    type: HealthResponseDto,
   })
   async check(
     @Res({ passthrough: true }) response: StatusResponse,

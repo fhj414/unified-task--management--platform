@@ -1,5 +1,5 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
-import { HealthResponse } from '@enterprise-hub/shared';
+import type { HealthResponse } from '@enterprise-hub/shared';
 import { PrismaService } from '../database/prisma.service';
 import { RedisService } from '../redis/redis.service';
 

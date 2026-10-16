@@ -73,8 +73,9 @@ docker compose down -v
 ```
 
 The checked-in Compose configuration publishes PostgreSQL on `5432` and Redis
-on `6379`. If either port is already occupied, stop the conflicting local
-service or alter the local Compose configuration and matching `.env` values.
+on `6379`, bound to `127.0.0.1` for local access only. If either port is already
+occupied, stop the conflicting local service or alter the local Compose
+configuration and matching `.env` values.
 
 ## Database commands
 
@@ -133,7 +134,7 @@ pnpm test
 pnpm test:e2e
 ```
 
-For a complete local verification run, use three terminals in this order.
+For a complete local verification run, use two terminals in this order.
 The API must be running before the endpoint requests in the final block.
 
 **Terminal B — prepare the local stack and database:**

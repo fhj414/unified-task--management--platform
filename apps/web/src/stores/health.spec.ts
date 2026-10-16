@@ -69,6 +69,21 @@ describe('health store', () => {
     expect(store.connectionLabel).toBe('Unavailable');
   });
 
+  it('does not connect when a 503 response body incorrectly claims to be up', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(
+        new Response(JSON.stringify(healthyResponse), { status: 503 }),
+      ),
+    );
+    const store = useHealthStore();
+
+    await store.loadHealth();
+
+    expect(store.state).toBe('unavailable');
+    expect(store.connectionLabel).toBe('Unavailable');
+  });
+
   it('reports unavailable and finishes loading when the health request is rejected', async () => {
     vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('offline')));
     const store = useHealthStore();

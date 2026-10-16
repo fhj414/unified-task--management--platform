@@ -1,6 +1,4 @@
-// joi@17.1.1 does not publish TypeScript declarations.
-// eslint-disable-next-line @typescript-eslint/no-require-imports
-const Joi = require('joi');
+import Joi from 'joi';
 
 export interface EnvironmentVariables {
   PORT: number;
