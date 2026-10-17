@@ -66,4 +66,22 @@ describe('validateEnvironment', () => {
       }),
     ).toMatchObject({ JWT_EXPIRES_IN: '1h' });
   });
+
+  it.each(['1m', '90m', '24h'])(
+    'accepts a supported JWT expiry within the development-token bounds: %s',
+    (JWT_EXPIRES_IN) => {
+      expect(
+        validateEnvironment({ ...validConfig, JWT_EXPIRES_IN }),
+      ).toMatchObject({ JWT_EXPIRES_IN });
+    },
+  );
+
+  it.each(['not-a-duration', '0s', '-1m', '59s', '25h'])(
+    'rejects an invalid or out-of-bounds JWT expiry: %s',
+    (JWT_EXPIRES_IN) => {
+      expect(() =>
+        validateEnvironment({ ...validConfig, JWT_EXPIRES_IN }),
+      ).toThrow(/JWT_EXPIRES_IN/);
+    },
+  );
 });

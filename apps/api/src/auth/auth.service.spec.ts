@@ -13,10 +13,10 @@ const ada = {
   updatedAt: new Date('2026-10-16T00:00:00.000Z'),
 };
 
-const independentUser = {
+const nonDemoUser = {
   id: 'user-without-department-id',
-  email: 'independent@enterprise-hub.local',
-  name: 'Independent User',
+  email: 'employee@enterprise-hub.local',
+  name: 'Real Employee',
   departmentId: null,
   department: null,
   createdAt: new Date('2026-10-16T00:00:00.000Z'),
@@ -43,8 +43,8 @@ describe('AuthService', () => {
     );
   });
 
-  it('lists mock users without database timestamps', async () => {
-    prisma.user.findMany.mockResolvedValue([ada, independentUser]);
+  it('lists only allowlisted mock users without database timestamps', async () => {
+    prisma.user.findMany.mockResolvedValue([ada, nonDemoUser]);
 
     await expect(service.listMockUsers()).resolves.toEqual([
       {
@@ -52,12 +52,6 @@ describe('AuthService', () => {
         email: 'ada.lovelace@enterprise-hub.local',
         name: 'Ada Lovelace',
         department: { id: 'engineering-id', name: 'Engineering' },
-      },
-      {
-        id: 'user-without-department-id',
-        email: 'independent@enterprise-hub.local',
-        name: 'Independent User',
-        department: null,
       },
     ]);
   });
@@ -91,14 +85,24 @@ describe('AuthService', () => {
     ).rejects.toBeInstanceOf(UnauthorizedException);
   });
 
+  it('rejects a non-demo database user before lookup or token signing', async () => {
+    prisma.user.findUnique.mockResolvedValue(nonDemoUser);
+
+    await expect(
+      service.login('employee@enterprise-hub.local'),
+    ).rejects.toBeInstanceOf(UnauthorizedException);
+    expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    expect(jwtService.signAsync).not.toHaveBeenCalled();
+  });
+
   it('returns the current user without database timestamps', async () => {
-    prisma.user.findUnique.mockResolvedValue(independentUser);
+    prisma.user.findUnique.mockResolvedValue(nonDemoUser);
 
     await expect(service.getCurrentUser('user-without-department-id')).resolves
       .toEqual({
         id: 'user-without-department-id',
-        email: 'independent@enterprise-hub.local',
-        name: 'Independent User',
+        email: 'employee@enterprise-hub.local',
+        name: 'Real Employee',
         department: null,
       });
   });

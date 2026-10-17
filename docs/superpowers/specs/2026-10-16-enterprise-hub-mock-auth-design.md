@@ -59,9 +59,11 @@ application-wide authorization policy is deliberately introduced.
 ## Configuration and Implementation Boundaries
 
 The API gains `JWT_SECRET` and a bounded JWT expiry setting, both validated at
-startup. `.env.example` supplies a clearly local-development secret. Runtime
-JWT work uses `@nestjs/jwt` plus a small project guard instead of Passport, so
-the authentication boundary remains easy to inspect and replace.
+startup. The expiry accepts supported duration syntax from one minute through
+24 hours, inclusive, and defaults to one hour. `.env.example` supplies a
+clearly local-development secret. Runtime JWT work uses `@nestjs/jwt` plus a
+small project guard instead of Passport, so the authentication boundary
+remains easy to inspect and replace.
 
 The auth service owns user lookup and token issuance. The guard owns header
 parsing and token verification, and it attaches a small authenticated-user

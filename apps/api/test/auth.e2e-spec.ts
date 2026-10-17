@@ -1,5 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { configureApplication } from '../src/app.configuration';
@@ -23,6 +24,15 @@ const mockUsers = [
     name: 'Grace Hopper',
     departmentId: null,
     department: null,
+    createdAt: new Date('2026-10-16T00:00:00.000Z'),
+    updatedAt: new Date('2026-10-16T00:00:00.000Z'),
+  },
+  {
+    id: 'employee-id',
+    email: 'employee@enterprise-hub.local',
+    name: 'Real Employee',
+    departmentId: 'engineering-id',
+    department: { id: 'engineering-id', name: 'Engineering' },
     createdAt: new Date('2026-10-16T00:00:00.000Z'),
     updatedAt: new Date('2026-10-16T00:00:00.000Z'),
   },
@@ -93,7 +103,7 @@ describe('mock JWT authentication endpoints', () => {
     app = undefined;
   });
 
-  it('lists public mock users without raw Prisma timestamps', async () => {
+  it('lists only allowlisted mock users without raw Prisma timestamps', async () => {
     app = await createApp();
 
     const response = await request(app.getHttpServer())
@@ -151,6 +161,22 @@ describe('mock JWT authentication endpoints', () => {
     });
   });
 
+  it('does not authorize an existing non-demo database user', async () => {
+    app = await createApp();
+
+    const response = await request(app.getHttpServer())
+      .post('/auth/mock-login')
+      .send({ email: 'employee@enterprise-hub.local' })
+      .expect(401);
+
+    expect(response.body).toEqual({
+      statusCode: 401,
+      message: 'Unauthorized',
+      path: '/auth/mock-login',
+      timestamp: expect.any(String),
+    });
+  });
+
   it('returns the public 401 shape when /auth/me has no token', async () => {
     app = await createApp();
 
@@ -195,6 +221,49 @@ describe('mock JWT authentication endpoints', () => {
     expect(response.body).toEqual({
       statusCode: 401,
       message: 'Invalid or expired access token',
+      path: '/auth/me',
+      timestamp: expect.any(String),
+    });
+  });
+
+  it('returns the public 401 shape for a genuinely expired token', async () => {
+    app = await createApp();
+    const expiredToken = await app.get(JwtService).signAsync(
+      {
+        sub: 'ada-id',
+        email: 'ada.lovelace@enterprise-hub.local',
+      },
+      { expiresIn: -1 },
+    );
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${expiredToken}`)
+      .expect(401);
+
+    expect(response.body).toEqual({
+      statusCode: 401,
+      message: 'Invalid or expired access token',
+      path: '/auth/me',
+      timestamp: expect.any(String),
+    });
+  });
+
+  it('returns the public 401 shape for a signed token with an unknown subject', async () => {
+    app = await createApp();
+    const unknownUserToken = await app.get(JwtService).signAsync({
+      sub: 'deleted-user-id',
+      email: 'deleted@enterprise-hub.local',
+    });
+
+    const response = await request(app.getHttpServer())
+      .get('/auth/me')
+      .set('Authorization', `Bearer ${unknownUserToken}`)
+      .expect(401);
+
+    expect(response.body).toEqual({
+      statusCode: 401,
+      message: 'Unauthorized',
       path: '/auth/me',
       timestamp: expect.any(String),
     });

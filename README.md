@@ -57,8 +57,9 @@ pnpm prisma:seed
 The default `.env` values point at the Compose services on localhost. Do not
 commit `.env`; adjust it locally only when your ports or credentials differ.
 `JWT_SECRET` must be a local-development value of at least 24 characters, and
-`JWT_EXPIRES_IN` controls the local access-token lifetime (the example uses
-`1h`). Neither value is a production credential.
+`JWT_EXPIRES_IN` accepts a supported duration from `1m` through `24h`
+(inclusive; the default and example use `1h`). Neither value is a production
+credential.
 
 ### Local infrastructure
 

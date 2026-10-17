@@ -1,4 +1,8 @@
 import { Prisma, PrismaClient } from '@prisma/client';
+import {
+  MOCK_DEPARTMENTS,
+  MOCK_IDENTITIES,
+} from '../src/auth/mock-identities';
 
 type SeedPrismaClient = {
   department: {
@@ -9,31 +13,8 @@ type SeedPrismaClient = {
   };
 };
 
-const departments = [
-  { id: '2d2e2c8a-f9bd-4d96-99bf-69cfb4950031', name: 'Engineering' },
-  { id: '601dc8c4-2479-4af0-a32a-4b8f71b3d5d4', name: 'Operations' },
-] as const;
-
-const users = [
-  {
-    email: 'ada.lovelace@enterprise-hub.local',
-    name: 'Ada Lovelace',
-    departmentId: departments[0].id,
-  },
-  {
-    email: 'grace.hopper@enterprise-hub.local',
-    name: 'Grace Hopper',
-    departmentId: departments[1].id,
-  },
-  {
-    email: 'linus.torvalds@enterprise-hub.local',
-    name: 'Linus Torvalds',
-    departmentId: departments[0].id,
-  },
-] as const;
-
 export async function seedDatabase(prisma: SeedPrismaClient): Promise<void> {
-  for (const department of departments) {
+  for (const department of MOCK_DEPARTMENTS) {
     await prisma.department.upsert({
       where: { id: department.id },
       create: department,
@@ -41,7 +22,7 @@ export async function seedDatabase(prisma: SeedPrismaClient): Promise<void> {
     });
   }
 
-  for (const user of users) {
+  for (const user of MOCK_IDENTITIES) {
     await prisma.user.upsert({
       where: { email: user.email },
       create: user,

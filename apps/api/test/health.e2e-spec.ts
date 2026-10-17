@@ -60,6 +60,8 @@ describe('GET /health', () => {
     REDIS_HOST: '127.0.0.1',
     REDIS_PORT: '6379',
     CORS_ORIGIN: 'http://localhost:5173',
+    JWT_SECRET: 'local-development-jwt-secret-change-me',
+    JWT_EXPIRES_IN: '1h',
   };
   const originalEnvironment = Object.fromEntries(
     Object.keys(testEnvironment).map((key) => [key, process.env[key]]),

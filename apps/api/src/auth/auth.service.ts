@@ -2,6 +2,10 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import type { AuthenticatedUser, MockLoginResponse } from '@enterprise-hub/shared';
 import { PrismaService } from '../common/database/prisma.service';
+import {
+  isMockIdentityEmail,
+  MOCK_IDENTITY_EMAILS,
+} from './mock-identities';
 
 interface UserWithDepartment {
   id: string;
@@ -25,12 +29,21 @@ export class AuthService {
   ) {}
 
   async listMockUsers(): Promise<AuthenticatedUser[]> {
-    const users = await this.prisma.user.findMany({ select: userSelect });
+    const users = await this.prisma.user.findMany({
+      where: { email: { in: MOCK_IDENTITY_EMAILS } },
+      select: userSelect,
+    });
 
-    return users.map((user) => this.toAuthenticatedUser(user));
+    return users
+      .filter((user) => isMockIdentityEmail(user.email))
+      .map((user) => this.toAuthenticatedUser(user));
   }
 
   async login(email: string): Promise<MockLoginResponse> {
+    if (!isMockIdentityEmail(email)) {
+      throw new UnauthorizedException();
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { email },
       select: userSelect,
