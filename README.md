@@ -4,8 +4,8 @@ Enterprise Hub is a first-phase monorepo foundation for a unified team task
 workspace. It contains a Vue 3 preview UI, a NestJS API, shared TypeScript
 contracts, Prisma data models, and a local PostgreSQL/Redis development stack.
 
-This phase deliberately exposes only a health endpoint. It is an operational
-foundation, not a task-management product yet.
+This phase provides an operational foundation plus a local-only mock JWT
+authentication flow. It is not a task-management product yet.
 
 ## Prerequisites
 
@@ -37,8 +37,8 @@ docker compose version
 ```
 
 The API is split into `common`, `auth`, `users`, `departments`, `tasks`,
-`integrations`, and `sync` module areas. Only the common health module has an
-HTTP endpoint in this phase.
+`integrations`, and `sync` module areas. The health module and the local mock
+authentication module expose HTTP endpoints in this phase.
 
 ## First-time setup
 
@@ -51,10 +51,14 @@ docker compose up -d --wait --wait-timeout 60
 docker compose ps
 pnpm prisma:generate
 pnpm prisma:migrate
+pnpm prisma:seed
 ```
 
 The default `.env` values point at the Compose services on localhost. Do not
 commit `.env`; adjust it locally only when your ports or credentials differ.
+`JWT_SECRET` must be a local-development value of at least 24 characters, and
+`JWT_EXPIRES_IN` controls the local access-token lifetime (the example uses
+`1h`). Neither value is a production credential.
 
 ### Local infrastructure
 
@@ -86,6 +90,9 @@ pnpm prisma:generate
 # Apply checked-in migrations in local development
 pnpm prisma:migrate
 
+# Upsert the local mock users after migrations (safe to run repeatedly)
+pnpm prisma:seed
+
 # Open Prisma Studio
 pnpm prisma:studio
 ```
@@ -115,8 +122,13 @@ Once started, use:
 - API health: <http://localhost:3000/health>
 - Swagger UI: <http://localhost:3000/docs>
 
-The Vite development server proxies `/health` to the API. Start the API before
-expecting the connection card in the web preview to report healthy.
+The Vite development server proxies `/health` and `/auth` to the API. Start
+the API before expecting the connection card or mock-account chooser to work.
+
+On first load, choose one of the seeded demo accounts to open the preview.
+The app stores the access token only in browser session storage, restores it by
+calling `GET /auth/me` after a refresh, and returns to the chooser when you
+sign out.
 
 ## Validate, build, and test
 
@@ -143,6 +155,7 @@ The API must be running before the endpoint requests in the final block.
 docker compose up -d --wait --wait-timeout 60
 pnpm prisma:generate
 pnpm prisma:migrate
+pnpm prisma:seed
 ```
 
 **Terminal A — start the API and keep this command running:**
@@ -161,13 +174,22 @@ curl --fail --silent http://localhost:3000/docs
 
 ## API contract and operational checks
 
-`GET /health` is the only application endpoint currently exposed. When
-PostgreSQL and Redis are available it returns HTTP 200 with `status: "up"` and
-each `services` component set to `"up"`. If either dependency is unavailable,
-it returns HTTP 503 with the unavailable component marked `"down"`; connection
-details are intentionally not sent to clients.
+| Endpoint | Access | Purpose |
+| --- | --- | --- |
+| `GET /health` | Public | Reports API, PostgreSQL, and Redis health. |
+| `GET /auth/mock-users` | Public | Lists seeded local mock users with department summaries. |
+| `POST /auth/mock-login` | Public | Accepts `{ "email": "..." }` and returns an access token with the selected user. |
+| `GET /auth/me` | Bearer JWT | Returns the current user for a valid access token. |
 
-Swagger documents the endpoint at `/docs`. Application startup also enables
+When PostgreSQL and Redis are available, `GET /health` returns HTTP 200 with
+`status: "up"` and each `services` component set to `"up"`. If either
+dependency is unavailable, it returns HTTP 503 with the unavailable component
+marked `"down"`; connection details are intentionally not sent to clients.
+
+Mock login looks up only the seeded local users. A missing, invalid, expired,
+or unknown-user token receives the existing standardized 401 response.
+
+Swagger documents these endpoints at `/docs`. Application startup also enables
 global request validation, exception formatting, environment validation,
 request logging, and CORS using `CORS_ORIGIN`.
 
@@ -206,11 +228,12 @@ health endpoint returns HTTP `200`.
 ## Current scope and mock-auth boundary
 
 This phase contains the project skeleton, shared health contract, local
-infrastructure, the Prisma data model, an API health check, and a static web
-preview with placeholder tasks. The `auth` module is structural only: it does
-not provide a real DingTalk login, JWT/session handling, or any other login
-endpoint. There is no task, user, department, integration, or synchronization
-CRUD yet.
+infrastructure, Prisma data model, a health check, and a preview UI with
+local-only mock JWT authentication. The `auth` module provides seeded-user
+selection, a short-lived local JWT, and current-user lookup for development.
+It does not provide real DingTalk login, passwords, registration, refresh
+tokens, production credentials, or a production account system. There is no
+task, user, department, integration, or synchronization CRUD yet.
 
 No SaaS connector, queue producer/consumer, microservice deployment,
 Kubernetes configuration, complex DDD layer, or production observability
@@ -220,11 +243,10 @@ platform is included.
 
 Build the product in small, separately tested increments:
 
-1. Add a local mock-auth flow and a current-user endpoint.
-2. Add read-only department and user membership endpoints.
-3. Add task create, list, detail, and status-update endpoints.
-4. Define one SaaS connector configuration and credential abstraction.
-5. Add BullMQ synchronization producers/consumers with idempotency handling.
+1. Add read-only department and user membership endpoints.
+2. Add task create, list, detail, and status-update endpoints.
+3. Define one SaaS connector configuration and credential abstraction.
+4. Add BullMQ synchronization producers/consumers with idempotency handling.
 
 Each step should retain the health endpoint, document its new API surface in
 Swagger, and add focused unit and endpoint tests before adding the next one.
